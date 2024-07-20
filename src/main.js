@@ -1,33 +1,54 @@
-import { Client } from 'node-appwrite';
+import { Client, Query, Users } from 'node-appwrite';
+const cors = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': '*',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
 
-// This is your Appwrite function
-// It's executed each time we get a request
+
 export default async ({ req, res, log, error }) => {
-  // Why not try the Appwrite SDK?
-  //
-  // const client = new Client()
-  //    .setEndpoint('https://cloud.appwrite.io/v1')
-  //    .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-  //    .setKey(process.env.APPWRITE_API_KEY);
+  const statusCode = 200;
+  const client = new Client()
+     .setEndpoint('https://cloud.appwrite.io/v1')
+     .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
+     .setKey(process.env.APPWRITE_API_KEY);
 
-  // You can log messages to the console
-  log('Hello, Logs!');
+      const user = new Users(client)
 
-  // If something goes wrong, log an error
-  error('Hello, Errors!');
+     try{
+      const {email} = req.query // for getting query parameters
+      // const {email} = req.body // for getting body parameters
+      if (!email){
+        return res.json({
+          status:false,
+          error: "Email is required"},400,{...cors});
+      }
+      const srchUse = user.list([Query.equal("email",email)])
+      
+      if (srchUse.length == 0){
+        return res.json({
+          status:true,
+          found:false,
+          message: "User not found"},404,{...cors});
+      
+      }
+      return res.json({
+        status:true,
+        found:true,
+        message: srchUse},200,{...cors});
+    
+   
 
-  // The `req` object contains the request data
-  if (req.method === 'GET') {
-    // Send a response with the res object helpers
-    // `res.send()` dispatches a string back to the client
-    return res.send('Hello, World!');
-  }
 
-  // `res.json()` is a handy helper for sending JSON
-  return res.json({
-    motto: 'Build like a team of hundreds_',
-    learn: 'https://appwrite.io/docs',
-    connect: 'https://appwrite.io/discord',
-    getInspired: 'https://builtwith.appwrite.io',
-  });
+     }
+     catch(err){
+        log.error(err.message);
+        return res.json({
+          status:false,
+          error: err.message
+        },500,{...cors});
+     }
+
+
+
 };
