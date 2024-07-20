@@ -26,13 +26,13 @@ export default async ({ req, res, log, error }) => {
           status:false,
           error: "Email is required"},400,{...cors});
       }
-      if (emailValidator.validate(email)){
+      if (!emailValidator.validate(email)){
         return res.json({
           status:false,
           error: "Invalid email"},400,{...cors});
       }
 
-      const srchUse = user.list()
+      const srchUse = await user.list()
       
       if (srchUse.length == 0){
         return res.json({
