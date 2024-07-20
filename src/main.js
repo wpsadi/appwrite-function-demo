@@ -32,7 +32,9 @@ export default async ({ req, res, log, error }) => {
           error: "Invalid email"},400,{...cors});
       }
 
-      const srchUse = await user.list()
+      const srchUse = (await user.list()).filter(item=>{
+        return item.email == email
+      })
       
       if (srchUse.length == 0){
         return res.json({
