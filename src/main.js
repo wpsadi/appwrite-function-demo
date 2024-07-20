@@ -1,4 +1,8 @@
 import { Client, Query, Users } from 'node-appwrite';
+import emailValidator from "email-validator"
+
+
+
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': '*',
@@ -7,7 +11,6 @@ const cors = {
 
 
 export default async ({ req, res, log, error }) => {
-  const statusCode = 200;
   const client = new Client()
      .setEndpoint('https://cloud.appwrite.io/v1')
      .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
@@ -23,7 +26,13 @@ export default async ({ req, res, log, error }) => {
           status:false,
           error: "Email is required"},400,{...cors});
       }
-      const srchUse = user.list([Query.equal("email",email)])
+      if (emailValidator.validate(email)){
+        return res.json({
+          status:false,
+          error: "Invalid email"},400,{...cors});
+      }
+
+      const srchUse = user.list()
       
       if (srchUse.length == 0){
         return res.json({
